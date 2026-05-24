@@ -6,7 +6,7 @@
   <title>Hollow</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800&family=Bebas+Neue&family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=Special+Elite&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800&family=Bebas+Neue&family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=Playfair+Display:ital@1&family=Special+Elite&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -18,7 +18,7 @@
     <div class="title-content">
       <h1 class="title">HOLLOW</h1>
       <p class="subtitle">A Town at the Edge of the Trees</p>
-      <p class="dateline">Revelstoke, British Columbia &middot; 1955</p>
+      <p class="dateline">Revelstoke, British Columbia &middot; <span class="year-trigger" data-clue="sign" title="examine">1955</span></p>
       <p class="enter-prompt">click anywhere to enter</p>
     </div>
 
@@ -165,6 +165,57 @@
     <div id="evidence-panel"></div>
   </div>
 
+  <!-- Clue overlay -->
+  <div class="clue-overlay" id="clueOverlay" role="dialog" aria-modal="true" aria-labelledby="clueLabel">
+    <div class="clue-card">
+      <div class="clue-label" id="clueLabel"></div>
+      <div class="clue-text"  id="clueText"></div>
+      <button class="clue-close" id="clueClose" type="button">[ close ]</button>
+    </div>
+  </div>
+
   <script src="game.js"></script>
+  <script>
+  (function () {
+    const CLUES = {
+      sign: {
+        label: 'The Sign',
+        text:  'The year on the sign reads 1955. It is the third time it has been 1955.'
+      }
+    };
+
+    const overlay  = document.getElementById('clueOverlay');
+    const labelEl  = document.getElementById('clueLabel');
+    const textEl   = document.getElementById('clueText');
+    const closeBtn = document.getElementById('clueClose');
+
+    function openClue(id) {
+      const clue = CLUES[id];
+      if (!clue) return;
+      labelEl.textContent = clue.label;
+      textEl.textContent  = clue.text;
+      overlay.classList.add('open');
+      closeBtn.focus();
+    }
+
+    function closeClue() {
+      overlay.classList.remove('open');
+    }
+
+    document.querySelectorAll('[data-clue]').forEach(el => {
+      el.addEventListener('click', e => {
+        e.stopPropagation();
+        openClue(el.dataset.clue);
+        el.classList.add('found');
+      });
+    });
+
+    closeBtn.addEventListener('click', closeClue);
+    overlay.addEventListener('click', e => { if (e.target === overlay) closeClue(); });
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape' && overlay.classList.contains('open')) closeClue();
+    });
+  })();
+  </script>
 </body>
 </html>
