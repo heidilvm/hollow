@@ -224,7 +224,8 @@
       'hs-dish': {
         type:  'evidence',
         label: 'The Dish',
-        text:  'Installed 1987. Pointed east-southeast. The house it belongs to has been empty since March.'
+        text:  'A dish-shaped aerial, bolted to the roof of the hardware store. Bigger than the ones on the houses. It points up the valley, at the mountain.',
+        flag:  'saw_dish'
       },
       'hs-hardware': {
         type: 'atmo',
@@ -236,8 +237,11 @@
         text: '1949 Ford pickup. Good condition. Local plates. The bed has mud on it — mountain mud, darker than the valley soil.'
       },
       'hs-mountain': {
-        type: 'atmo',
-        text: "The Selkirks. They've been there longer than the town, longer than the province, longer than the country."
+        type: 'conditional',
+        flagsRequired: ['saw_dish', 'saw_date'],
+        textBefore: "The Selkirks. They've been there longer than the town, longer than the province, longer than the country.",
+        textAfter: "The Selkirks. They've been there longer than the town, longer than the province, longer than the country. You keep looking anyway.",
+        flagOnSuccess: 'noticed_dish_contradiction'
       },
       'hs-diner': {
         type: 'nav',
@@ -260,12 +264,31 @@
       } catch (e) {}
     }
 
+    function getFlag(name) {
+      try {
+        const raw  = localStorage.getItem('hollow_save');
+        const data = raw ? JSON.parse(raw) : {};
+        return !!(data.flags && data.flags[name]);
+      } catch (e) { return false; }
+    }
+
     function openPopup(id) {
       const data = HOTSPOTS[id];
       if (!data) return;
 
       if (data.type === 'nav') {
         navigateTo(data.url);
+        return;
+      }
+
+      if (data.type === 'conditional') {
+        const allMet = data.flagsRequired.every(f => getFlag(f));
+        if (allMet) setFlag(data.flagOnSuccess);
+        labelEl.style.display = 'none';
+        textEl.className      = 'popup-text popup-text--atmo';
+        textEl.textContent    = allMet ? data.textAfter : data.textBefore;
+        popup.classList.add('open');
+        closeBtn.focus();
         return;
       }
 
