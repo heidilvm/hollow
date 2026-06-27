@@ -247,3 +247,16 @@
   };
 
 })();
+
+// ── Room handler helpers ──────────────────────
+// Called by onClick handlers in data/rooms.js.
+// state is the single shared object passed to every click in a room.
+
+function setFlag(state, flagName) {
+  state.flags = state.flags || {};
+  state.flags[flagName] = true;
+}
+
+function hasFlag(state, flagName) {
+  return !!(state.flags && state.flags[flagName]);
+}
